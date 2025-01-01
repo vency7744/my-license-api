@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+</head>
+<body>
+    <h1>Admin Control Panel</h1>
+    <h2>Generate License Key</h2>
+    <form id="generate-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <button type="submit">Generate</button>
+    </form>
+
+    <h2>License Keys</h2>
+    <ul id="licenses-list"></ul>
+
+    <script>
+        document.getElementById('generate-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            fetch('/api/generate.php', {
+                method: 'POST',
+                body: JSON.stringify({ username: username }),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('License Generated: ' + data.licenseKey);
+                loadLicenses();
+            });
+        });
+
+        function loadLicenses() {
+            fetch('/api/list.php')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('licenses-list');
+                    list.innerHTML = '';
+                    data.forEach(license => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Username: ${license.username}, License Key: ${license.licenseKey}, Expiry: ${license.expiryDate}`;
+                        list.appendChild(listItem);
+                    });
+                });
+        }
+
+        loadLicenses();
+    </script>
+</body>
+</html>
